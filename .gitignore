@@ -1,1 +1,3 @@
 node_modules/*
+*.pdf
+all.csv
