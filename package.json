@@ -1,0 +1,18 @@
+{
+  "name": "saoke_yagi",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "parse": "node parse.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pdf-data-parser": "^1.2.15",
+    "zlib": "^1.0.5"
+  }
+}

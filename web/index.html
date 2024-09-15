@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sao kê MTTQ - Bão Yagi</title>
+
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <!-- data table -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.6/css/dataTables.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.1.6/js/dataTables.js"></script>
+
+    <!-- highlight -->
+    <script src="https://bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/2.1.6/features/searchHighlight/dataTables.searchHighlight.min.js">
+    </script>
+    <link rel="stylesheet"
+        href="https://cdn.datatables.net/plug-ins/2.1.6/features/searchHighlight/dataTables.searchHighlight.css">
+
+    <!-- chart -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+    <!-- pako for gzip -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.11/pako.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>🕵🏼‍♂️ VAR Sao kê MTTQ - Bão Yagi 🌪️</h1>
+
+    <button id="theme" title="Sáng/Tối">👁️</button>
+
+    <h3>Dữ liệu được cung cấp bởi
+        <a target="_blank" href="https://www.facebook.com/thongtinchinhphu">Thông tin chính phủ</a> xử lý dữ liệu và web
+        bởi <a target="_blank" href="https://github.com/hoangTran0410">HoangTran</a> (<a target="_blank"
+            href="https://github.com/HoangTran0410/saoke_yagi">code</a>)
+    </h3>
+
+    <p>
+        Dữ liệu mới nhất 01-13/09/2024: Vietcombank + BIDV + Vietinbank + Agribank
+        (<a target="_blank" href="../data/input/">Xem nguồn</a>)
+    </p>
+
+    <div id="sumary"></div>
+
+    <div class="table_container">
+        <table id="myTable" class="display">
+            <thead>
+                <tr>
+                    <th>Ngày</th>
+                    <th>Bank</th>
+                    <th>Mã</th>
+                    <th>Số tiền</th>
+                    <th>Chi tiết giao dịch</th>
+                    <th>Trang PDF</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="loading">Đang tải trang...</div>
+
+    <script src="./main.js"></script>
+</body>
+
+</html>
