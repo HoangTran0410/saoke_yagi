@@ -56,15 +56,17 @@ async function initSelect() {
 
   // fetch file size
   const options = dataSelect.querySelectorAll("option");
-  for (const o of options) {
-    loadingDiv.innerHTML = "Đang tải kích thước file... " + o.value;
-    const res = await fetch(o.value, {
-      method: "HEAD",
-    });
-    const length = res.headers.get("Content-Length");
-    const size = formatSize(length);
-    o.innerHTML += ` (${size})`;
-  }
+  loadingDiv.innerHTML = "Đang tải kích thước file...";
+  await Promise.all(
+    Array.from(options).map(async (o) => {
+      const res = await fetch(o.value, {
+        method: "HEAD",
+      });
+      const length = res.headers.get("Content-Length");
+      const size = formatSize(length);
+      o.innerHTML += ` (${size})`;
+    })
+  );
   loadingDiv.innerHTML = "Vui lòng chọn dữ liệu muốn xem. Rồi bấm Tải";
 
   fetchDataBtn.addEventListener("click", () => {
