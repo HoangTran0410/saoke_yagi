@@ -126,6 +126,7 @@ async function fetchData(filePath) {
 
   const tableEle = document.createElement("table");
   tableEle.id = "myTable";
+  tableEle.className = "display stripe hover order-column";
   tableEle.innerHTML = `
       <thead>
         <tr>
@@ -140,6 +141,23 @@ async function fetchData(filePath) {
     `;
   tableContainer.appendChild(tableEle);
   table = new DataTable("#myTable", {
+    layout: {
+      topStart: {
+        pageLength: {
+          menu: [5, 10, 25, 50, 100],
+        },
+      },
+      // topEnd: {
+      //   search: {
+      //     placeholder: "Type search here",
+      //   },
+      // },
+      bottomEnd: {
+        paging: {
+          buttons: 5,
+        },
+      },
+    },
     searchDelay: 350,
     searchHighlight: true,
     search: {
@@ -154,27 +172,20 @@ async function fetchData(filePath) {
       infoFiltered: "(Lọc từ _MAX_ giao dịch)",
       lengthMenu: "Hiện _MENU_ giao dịch",
       zeroRecords: "Không tìm thấy giao dịch nào",
-      paginate: {
-        first: "«",
-        last: "»",
-        next: ">",
-        previous: "<",
-      },
     },
     data: transactions,
     columns: [
-      { data: "date", name: "date" },
-      { data: "bank", name: "bank" },
+      { data: "date", name: "date", type: "string" },
+      { data: "bank", name: "bank", type: "string" },
       { data: "id", name: "id" },
       {
         data: "money",
         render: (data, type) => {
           return DataTable.render.number(",", ".", 0, "", "").display(data);
         },
-        // type: "num-fmt",
       },
-      { data: "desc", name: "desc" },
-      { data: "page", name: "page", type: "num-fmt" },
+      { data: "desc", name: "desc", type: "string" },
+      { data: "page", name: "page", type: "num" },
     ],
     initComplete: function () {
       // Apply the search column
