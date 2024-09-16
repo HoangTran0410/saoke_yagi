@@ -2,12 +2,15 @@ import { AG_GRID_LOCALE_VN } from "./lib/ag_grid_vi.js";
 
 const loadingDiv = document.querySelector("#loading");
 const sumaryDiv = document.querySelector("#sumary");
+const sumaryTable = document.querySelector("#sumaryTable");
+const agChartDiv = document.querySelector("#agChart");
 const themeBtn = document.querySelector("#theme");
 const dataSelect = document.querySelector("#data-select");
 const fetchDataBtn = document.querySelector("#fetch-data-btn");
 const tableEle = document.querySelector("#myTable");
 
 let darkMode = false;
+let agChart, agChartOptions;
 
 (() => {
   initTheme();
@@ -29,6 +32,10 @@ function initTheme() {
 function setDarkMode(dark) {
   darkMode = dark;
   tableEle.className = dark ? "ag-theme-quartz-dark" : "ag-theme-quartz";
+  if (agChart) {
+    agChartOptions.theme = dark ? "ag-default-dark" : "ag-default";
+    agCharts.AgCharts.update(agChart, agChartOptions);
+  }
   document.body.classList.toggle("dark", dark);
   localStorage.setItem("theme", dark);
 }
@@ -146,12 +153,35 @@ async function fetchData(filePath) {
     gridApi = agGrid.createGrid(tableEle, {
       localeText: AG_GRID_LOCALE_VN,
       pagination: true,
+      enableCellTextSelection: true,
+      suppressDragLeaveHidesColumns: true,
       rowData: transactions,
       columnDefs: [
         {
           field: "date",
           headerName: "Ngày",
-          width: 100,
+          width: 150,
+          filter: "agDateColumnFilter",
+          filterParams: {
+            comparator: (filterLocalDateAtMidnight, cellValue) => {
+              const dateAsString = cellValue;
+              if (dateAsString == null) return -1;
+              const dateParts = dateAsString.split(" ")[0].split("/");
+              const cellDate = new Date(
+                2024,
+                Number(dateParts[1]) - 1,
+                Number(dateParts[0])
+              );
+              if (filterLocalDateAtMidnight.getTime() === cellDate.getTime())
+                return 0;
+              if (cellDate < filterLocalDateAtMidnight) return -1;
+              if (cellDate > filterLocalDateAtMidnight) return 1;
+              return 0;
+            },
+            maxValidDate: "2024-09-13",
+            minValidDate: "2024-09-01",
+            inRangeFloatingFilterDateFormat: "Do MMM YYYY",
+          },
         },
         {
           field: "bank",
@@ -161,14 +191,14 @@ async function fetchData(filePath) {
         {
           field: "id",
           headerName: "Mã",
-          width: 100,
+          width: 130,
         },
         {
           field: "money",
           headerName: "Số tiền",
           valueFormatter: (params) => formatMoney(params.value),
           filter: "agNumberColumnFilter",
-          type: "rightAligned",
+          type: ["rightAligned"],
           width: 150,
         },
         {
@@ -187,8 +217,13 @@ async function fetchData(filePath) {
       ],
       defaultColDef: {
         filter: true,
-        sortable: true,
+        // sortable: true,
         // resizable: true,
+        filterParams: {
+          maxNumConditions: 10,
+          defaultJoinOperator: "OR",
+        },
+        suppressMovable: true,
         floatingFilter: true,
       },
 
@@ -206,7 +241,6 @@ async function fetchData(filePath) {
   loadingDiv.style.display = "none";
 }
 
-let canvas, chart;
 function drawSummary(trans, allTrans) {
   // sumary
   loadingDiv.innerHTML = "Đang phân tích dữ liệu...";
@@ -220,8 +254,7 @@ function drawSummary(trans, allTrans) {
     if (t.money < min) min = t.money;
   });
 
-  sumaryDiv.innerHTML =
-    "<table>" +
+  sumaryTable.innerHTML =
     `<tr><th colspan='2' style="text-align: center">
       Thống kê
       ${trans.length < allTrans.length ? `dữ liệu đang hiển thị` : "TỔNG"}
@@ -234,8 +267,7 @@ function drawSummary(trans, allTrans) {
       ["Thấp nhất", formatMoney(min)],
     ]
       .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
-      .join("") +
-    "</table>";
+      .join("");
 
   // chart money range
   const ranges = [
@@ -256,65 +288,90 @@ function drawSummary(trans, allTrans) {
   const totalByRange = ranges.map((range) => {
     const m = trans.filter((t) => t.money >= range[0] && t.money < range[1]);
     return {
-      transactions: m.length,
-      moneys: m.reduce((a, b) => a + b.money, 0),
       name: shortenMoney(range[0]) + " - " + shortenMoney(range[1]),
+      moneys: m.reduce((a, b) => a + b.money, 0),
+      transactions: m.length,
     };
   });
 
-  if (!chart) {
-    canvas = document.createElement("canvas");
-    canvas.id = "chart";
-    const ctx = canvas.getContext("2d");
-    // render chart
-    chart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: totalByRange.map((c) => c.name),
-        datasets: [
-          {
-            label: "Tổng giao dịch",
-            data: totalByRange.map((c) => c.transactions),
-            minBarLength: 2,
-            yAxisID: "count",
-          },
-          {
-            label: "Tổng tiền",
-            data: totalByRange.map((c) => c.moneys),
-            minBarLength: 2,
-            yAxisID: "money",
-          },
-        ],
+  if (!agChart) {
+    agChartOptions = {
+      container: document.getElementById("agChart"),
+      theme: darkMode ? "ag-default-dark" : "ag-default",
+      title: {
+        text: "Tổng tiền/giao dịch theo giá tiền",
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: "top",
-          },
-          title: {
-            display: true,
-            text: "Tổng tiền/giao dịch theo giá tiền",
+      data: totalByRange,
+      legend: {
+        position: "top",
+      },
+      series: [
+        {
+          type: "bar",
+          xKey: "name",
+          yKey: "transactions",
+          yName: "Tổng giao dịch",
+          tooltip: {
+            renderer: ({ datum, xKey, yKey }) => {
+              return {
+                title: datum[xKey],
+                content: formatNumber(datum[yKey]),
+              };
+            },
           },
         },
-        scales: {
-          count: {
-            position: "left",
-          },
-          money: {
-            position: "right",
+        {
+          type: "bar",
+          xKey: "name",
+          yKey: "moneys",
+          yName: "Tổng tiền",
+          tooltip: {
+            renderer: ({ datum, xKey, yKey }) => {
+              return {
+                title: datum[xKey],
+                content: formatMoney(datum[yKey]),
+              };
+            },
           },
         },
-      },
-    });
+      ],
+      axes: [
+        {
+          type: "category",
+          position: "bottom",
+          label: {
+            autoRotate: false,
+            rotation: 0,
+            avoidCollisions: true,
+          },
+        },
+        {
+          type: "number",
+          position: "left",
+          keys: ["transactions"],
+          label: {
+            formatter: (params) => {
+              return formatNumber(params.value);
+            },
+          },
+        },
+        {
+          type: "number",
+          position: "right",
+          keys: ["moneys"],
+          label: {
+            formatter: (params) => {
+              return shortenMoney(params.value);
+            },
+          },
+        },
+      ],
+    };
+    agChart = agCharts.AgCharts.create(agChartOptions);
   } else {
-    chart.data.labels = totalByRange.map((c) => c.name);
-    chart.data.datasets[0].data = totalByRange.map((c) => c.transactions);
-    chart.data.datasets[1].data = totalByRange.map((c) => c.moneys);
-    chart.update();
+    agChartOptions.data = totalByRange;
+    agCharts.AgCharts.update(agChart, agChartOptions);
   }
-
-  sumaryDiv.appendChild(canvas);
 }
 
 async function getBlobFromUrlWithProgress(url, progressCallback) {

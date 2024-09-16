@@ -1,5 +1,10 @@
 * {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+    font-family: -apple-system, "system-ui", "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
 h1 {
@@ -20,6 +25,7 @@ body {
     align-items: center;
     background-color: #eee;
     color: #222;
+    overflow-x: hidden;
 }
 
 body.dark {
@@ -69,6 +75,13 @@ h3 {
     align-items: center;
     justify-content: space-around;
     flex-wrap: wrap;
+    padding: 10px;
+}
+
+#jsChart,
+#agChart {
+    min-height: 300px;
+    min-width: min(700px, 100vw);
 }
 
 #sumary table {
@@ -79,10 +92,6 @@ h3 {
 
 #sumary td {
     padding-right: 10px;
-}
-
-canvas#chart {
-    height: 300px !important;
 }
 
 a {

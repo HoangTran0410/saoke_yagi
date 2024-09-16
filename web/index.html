@@ -6,15 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sao kê MTTQ - Bão Yagi</title>
 
-    <!-- chart -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-
     <!-- pako for gzip -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.11/pako.min.js"></script>
 
     <!-- ag-grid and ag-charts -->
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/ag-charts-community@9.0.0/dist/umd/ag-charts-community.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-charts-community@9.0.0/dist/umd/ag-charts-community.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css">
 
     <link rel="stylesheet" href="style.css">
@@ -31,7 +28,7 @@
             href="https://github.com/HoangTran0410/saoke_yagi">code</a>)
     </h3>
 
-    <p>
+    <p style="text-align: center;">
         Dữ liệu mới nhất 01-13/09/2024: Vietcombank + BIDV + Vietinbank + Agribank
         (<a target="_blank" href="../data/input/">Xem nguồn</a>)
     </p>
@@ -43,7 +40,10 @@
 
     <div id="loading">Đang tải trang...</div>
 
-    <div id="sumary"></div>
+    <div id="sumary">
+        <table id="sumaryTable"></table>
+        <div id="agChart"></div>
+    </div>
 
     <div class="table-container">
         <table id="myTable" class="ag-theme-quartz"></table>
