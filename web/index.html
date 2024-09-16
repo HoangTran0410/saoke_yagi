@@ -6,26 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sao kê MTTQ - Bão Yagi</title>
 
-    <!-- jquery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-
-    <!-- data table -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.6/css/dataTables.dataTables.min.css">
-    <script src="https://cdn.datatables.net/2.1.6/js/dataTables.min.js"></script>
-
-    <!-- highlight -->
-    <script src="https://bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
-    <script src="https://cdn.datatables.net/plug-ins/2.1.6/features/searchHighlight/dataTables.searchHighlight.min.js">
-    </script>
-    <link rel="stylesheet"
-        href="https://cdn.datatables.net/plug-ins/2.1.6/features/searchHighlight/dataTables.searchHighlight.css">
-
     <!-- chart -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
     <!-- pako for gzip -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.11/pako.min.js"></script>
+
+    <!-- ag-grid and ag-charts -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/ag-charts-community@9.0.0/dist/umd/ag-charts-community.js"></script> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css">
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -55,9 +45,9 @@
 
     <div id="sumary"></div>
 
-    <div class="table_container"></div>
+    <table id="myTable" class="ag-theme-quartz"></table>
 
-    <script src="./main.js"></script>
+    <script type="module" src="./main.js"></script>
 </body>
 
 </html>

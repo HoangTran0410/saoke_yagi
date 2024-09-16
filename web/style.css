@@ -23,8 +23,8 @@ body {
 }
 
 body.dark {
-    background-color: #21201d;
-    color: #b1a38b;
+    background-color: #272e37;
+    color: #eee;
 }
 
 #theme {
@@ -46,14 +46,14 @@ body.dark {
     background-color: #555;
 }
 
-#myTable_wrapper {
-    width: 100%;
-    max-width: 100%;
-}
-
 h1,
 h3 {
     text-align: center;
+}
+
+#myTable {
+    height: 500px;
+    width: 100%;
 }
 
 #loading {
@@ -61,11 +61,6 @@ h3 {
     text-align: center;
     width: 100%;
     margin: 20px;
-}
-
-table.dataTable span.highlight {
-    background-color: #9cddf9;
-    border-radius: 0.28571429rem;
 }
 
 #sumary {
@@ -103,12 +98,16 @@ a:hover {
     color: yellow;
 }
 
-.table_container {
-    max-width: 100vw;
-    overflow-x: auto;
-    padding-bottom: 50px;
-}
-
 button {
     cursor: pointer;
+}
+
+.ag-cell-value {
+    line-height: 20px !important;
+    word-break: normal;
+    /* prevent words from breaking */
+    padding-top: 5px;
+    /* space top */
+    padding-bottom: 5px;
+    /* space bottom */
 }

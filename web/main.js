@@ -1,10 +1,13 @@
+import { AG_GRID_LOCALE_VN } from "./lib/ag_grid_vi.js";
+
 const loadingDiv = document.querySelector("#loading");
 const sumaryDiv = document.querySelector("#sumary");
 const themeBtn = document.querySelector("#theme");
-const dataSelectContainer = document.querySelector("#data-select-container");
 const dataSelect = document.querySelector("#data-select");
 const fetchDataBtn = document.querySelector("#fetch-data-btn");
-const tableContainer = document.querySelector(".table_container");
+const tableEle = document.querySelector("#myTable");
+
+let darkMode = false;
 
 (() => {
   initTheme();
@@ -12,14 +15,22 @@ const tableContainer = document.querySelector(".table_container");
 })();
 
 // theme
+
 function initTheme() {
-  themeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    localStorage.setItem("theme", document.body.classList.contains("dark"));
-  });
   if (localStorage.getItem("theme") === "true") {
-    document.body.classList.add("dark");
+    setDarkMode(true);
   }
+
+  themeBtn.addEventListener("click", () => {
+    darkMode = !darkMode;
+    setDarkMode(darkMode);
+  });
+}
+function setDarkMode(dark) {
+  darkMode = dark;
+  tableEle.className = dark ? "ag-theme-quartz-dark" : "ag-theme-quartz";
+  document.body.classList.toggle("dark", dark);
+  localStorage.setItem("theme", dark);
 }
 
 async function initSelect() {
@@ -72,9 +83,7 @@ async function initSelect() {
   fetchDataBtn.addEventListener("click", () => {
     fetchDataBtn.disabled = true;
     fetchData(dataSelect.value + "?v=" + Date.now())
-      .then(() => {
-        // dataSelectContainer.style.display = "none";
-      })
+      .then(() => {})
       .catch((err) => {
         alert("ERROR: " + err);
       })
@@ -84,7 +93,7 @@ async function initSelect() {
   });
 }
 
-let table;
+let gridApi;
 async function fetchData(filePath) {
   loadingDiv.style.display = "block";
 
@@ -118,152 +127,65 @@ async function fetchData(filePath) {
 
   // render table
   loadingDiv.innerHTML = "Đang tạo bảng...";
-
-  if (table) {
-    table.destroy();
-    tableContainer.innerHTML = "";
-  }
-
-  const tableEle = document.createElement("table");
-  tableEle.id = "myTable";
-  tableEle.className = "display stripe hover order-column";
-  tableEle.innerHTML = `
-      <thead>
-        <tr>
-          <th>Ngày</th>
-          <th>Bank</th>
-          <th>Mã</th>
-          <th>Số tiền</th>
-          <th>Chi tiết giao dịch</th>
-          <th>Trang</th>
-        </tr>
-      </thead>
-    `;
-  tableContainer.appendChild(tableEle);
-  table = new DataTable("#myTable", {
-    layout: {
-      topStart: {
-        pageLength: {
-          menu: [5, 10, 25, 50, 100],
+  if (gridApi) {
+    gridApi.setGridOption("rowData", transactions);
+  } else {
+    gridApi = agGrid.createGrid(tableEle, {
+      localeText: AG_GRID_LOCALE_VN,
+      pagination: true,
+      rowData: transactions,
+      columnDefs: [
+        {
+          field: "date",
+          headerName: "Ngày",
+          width: 100,
         },
-      },
-      // topEnd: {
-      //   search: {
-      //     placeholder: "Type search here",
-      //   },
-      // },
-      bottomEnd: {
-        paging: {
-          buttons: 5,
+        {
+          field: "bank",
+          headerName: "Bank",
+          width: 100,
         },
-      },
-    },
-    searchDelay: 350,
-    searchHighlight: true,
-    search: {
-      // regex: true,
-      smart: true,
-    },
-    language: {
-      search: 'Tìm (bọc trong dấu " để tìm chính xác): ',
-      searchPlaceholder: "Ngày, mã, nội dung, tiền..",
-      emptyTable: "Không có dữ liệu",
-      info: "Hiển thị _START_ → _END_ / _TOTAL_ giao dịch",
-      infoFiltered: "(Lọc từ _MAX_ giao dịch)",
-      lengthMenu: "Hiện _MENU_ giao dịch",
-      zeroRecords: "Không tìm thấy giao dịch nào",
-    },
-    data: transactions,
-    columns: [
-      { data: "date", name: "date", type: "string" },
-      { data: "bank", name: "bank", type: "string" },
-      { data: "id", name: "id" },
-      {
-        data: "money",
-        render: (data, type) => {
-          return DataTable.render.number(",", ".", 0, "", "").display(data);
+        { field: "id", headerName: "Mã", width: 100 },
+        {
+          field: "money",
+          headerName: "Số tiền",
+          valueFormatter: (params) => formatMoney(params.value),
+          filter: "agNumberColumnFilter",
+          type: "rightAligned",
+          width: 150,
         },
+        {
+          field: "desc",
+          headerName: "Nội dung chuyển khoản",
+          wrapText: true,
+          autoHeight: true,
+          flex: 1,
+        },
+        {
+          field: "page",
+          headerName: "Trang",
+          filter: "agNumberColumnFilter",
+          width: 100,
+        },
+      ],
+      defaultColDef: {
+        // flex: 1,
+        filter: true,
+        sortable: true,
+        // resizable: true,
+        floatingFilter: true,
       },
-      { data: "desc", name: "desc", type: "string" },
-      { data: "page", name: "page", type: "num" },
-    ],
-    initComplete: function () {
-      // Apply the search column
-      this.api()
-        .columns()
-        .every(function () {
-          const column = this;
-          const title = column.header().textContent;
 
-          if (["Ngày", "Bank"].indexOf(title) != -1) {
-            // Create select element
-            let select = document.createElement("select");
-            select.add(new Option(""));
-            select.classList.add("dt-input");
-            column.header().appendChild(select);
-
-            // Apply listener for user change in value
-            select.addEventListener("change", function () {
-              column.search(select.value, { exact: false }).draw();
-            });
-            select.addEventListener("click", function (e) {
-              e.stopPropagation();
-            });
-
-            // Add list of options
-            column
-              .data()
-              .map((d) => d.split(" ")[0])
-              .unique()
-              .sort()
-              .each(function (d, j) {
-                select.add(new Option(d));
-              });
-          } else {
-            let delay;
-            // Create input element and add event listener
-            $(
-              '<input class="dt-input" type="text" placeholder="Tìm ' +
-                title +
-                '" style="max-width: 80px;display: block" />'
-            )
-              .appendTo($(column.header()))
-              .on("keyup change clear", function () {
-                if (column.search() !== this.value) {
-                  if (delay) clearTimeout(delay);
-                  delay = setTimeout(() => {
-                    column.search(this.value).draw();
-                  }, 350);
-                }
-              })
-              .on("click", function (e) {
-                e.stopPropagation();
-              });
-          }
+      onFilterChanged(params) {
+        const data = [];
+        params.api.forEachNodeAfterFilter((node) => {
+          data.push(node.data);
         });
-    },
-    drawCallback: function () {
-      const rows = this.api().rows({ search: "applied" }).data();
-      const trans = Array.from(rows);
-      drawSummary(trans, transactions);
-    },
-  });
-
-  // highlight
-  table.on("draw", function () {
-    const body = $(table.table().body());
-    body.unhighlight();
-    body.highlight(table.search());
-    const search = table.search();
-
-    if (search.startsWith('"') && search.endsWith('"')) {
-      body.highlight(search.substring(1, search.length - 1));
-    } else {
-      search.split(" ").forEach((word) => {
-        body.highlight(word);
-      });
-    }
-  });
+        drawSummary(data, transactions);
+      },
+    });
+  }
+  drawSummary(transactions, transactions);
 
   loadingDiv.style.display = "none";
 }
