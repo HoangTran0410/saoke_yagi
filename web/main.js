@@ -59,8 +59,7 @@ async function initSelect() {
   for (const o of options) {
     loadingDiv.innerHTML = "Đang tải kích thước file... " + o.value;
     const res = await fetch(o.value, {
-      method: "GET",
-      headers: { "X-HTTP-Method-Override": "HEAD" },
+      method: "HEAD",
     });
     const length = res.headers.get("Content-Length");
     const size = formatSize(length);
