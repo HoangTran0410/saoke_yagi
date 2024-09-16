@@ -1,17 +1,18 @@
 const loadingDiv = document.querySelector("#loading");
 const sumaryDiv = document.querySelector("#sumary");
 const themeBtn = document.querySelector("#theme");
+const dataSelectContainer = document.querySelector("#data-select-container");
+const dataSelect = document.querySelector("#data-select");
+const fetchDataBtn = document.querySelector("#fetch-data-btn");
+const tableContainer = document.querySelector(".table_container");
 
-window.onload = () => {
-  try {
-    main();
-  } catch (e) {
-    alert("ERROR: " + e);
-  }
-};
+(() => {
+  initTheme();
+  initSelect();
+})();
 
-async function main() {
-  // theme
+// theme
+function initTheme() {
   themeBtn.addEventListener("click", () => {
     document.body.classList.toggle("dark");
     localStorage.setItem("theme", document.body.classList.contains("dark"));
@@ -19,25 +20,82 @@ async function main() {
   if (localStorage.getItem("theme") === "true") {
     document.body.classList.add("dark");
   }
+}
+
+async function initSelect() {
+  loadingDiv.innerHTML = "Đang tải danh sách file...";
+  // create select
+  [
+    { label: "Tất cả", value: "all" },
+    {
+      group: "Theo ngân hàng",
+      prefix: "byBank",
+      options: ["VCB", "BIDV", "Vietin", "Agri"],
+    },
+    {
+      group: "Theo ngày",
+      prefix: "byDate",
+      options: Array.from({ length: 12 }).map((_, i) => `${padZero(i + 1)}-09`),
+    },
+  ].forEach((d) => {
+    const toPath = (o, prefix) =>
+      "../data/output/" + (prefix ? prefix + "/" : "") + o + ".csv.gz";
+    if (d.group) {
+      dataSelect.innerHTML += `
+        <optgroup label="${d.group}">
+          ${d.options
+            .map((o) => `<option value="${toPath(o, d.prefix)}">${o}</option>`)
+            .join("")}
+          </optgroup>`;
+    } else if (d.value) {
+      dataSelect.innerHTML += `<option value="${toPath(d.value)}">
+        ${d.label}
+      </option>`;
+    }
+  });
+
+  // fetch file size
+  const options = dataSelect.querySelectorAll("option");
+  for (const o of options) {
+    loadingDiv.innerHTML = "Đang tải kích thước file... " + o.value;
+    const res = await fetch(o.value, {
+      method: "GET",
+      headers: { "X-HTTP-Method-Override": "HEAD" },
+    });
+    const length = res.headers.get("Content-Length");
+    const size = formatSize(length);
+    o.innerHTML += ` (${size})`;
+  }
+  loadingDiv.innerHTML = "Vui lòng chọn dữ liệu muốn xem. Rồi bấm Tải";
+
+  fetchDataBtn.addEventListener("click", () => {
+    fetchDataBtn.disabled = true;
+    fetchData(dataSelect.value + "?v=" + Date.now())
+      .then(() => {
+        // dataSelectContainer.style.display = "none";
+      })
+      .catch((err) => {
+        alert("ERROR: " + err);
+      })
+      .finally(() => {
+        fetchDataBtn.disabled = false;
+      });
+  });
+}
+
+let table;
+async function fetchData(filePath) {
+  loadingDiv.style.display = "block";
 
   // fetch data
-  const fetchZip = true;
-  const response = await getBlobFromUrlWithProgress(
-    "../data/output/all.csv" + (fetchZip ? ".gz" : ""),
-    (progress) => {
-      loadingDiv.innerHTML = `Đang tải dữ liêu... ${formatSize(
-        progress.loaded
-      )}/${formatSize(progress.total)} (${formatSize(progress.speed)}/s)`;
-    }
-  );
-  let content;
+  const response = await getBlobFromUrlWithProgress(filePath, (progress) => {
+    loadingDiv.innerHTML = `Đang tải dữ liêu... ${formatSize(
+      progress.loaded
+    )}/${formatSize(progress.total)} (${formatSize(progress.speed)}/s)`;
+  });
   loadingDiv.innerHTML = "Tải xong. Đang giải nén dữ liệu...";
-  if (fetchZip) {
-    const compressedData = new Uint8Array(await response.arrayBuffer());
-    content = pako.inflate(compressedData, { to: "string" });
-  } else {
-    content = await response.text();
-  }
+  const compressedData = new Uint8Array(await response.arrayBuffer());
+  const content = pako.inflate(compressedData, { to: "string" });
 
   // prepare data
   loadingDiv.innerHTML = "Đang xử lý dữ liệu...";
@@ -59,7 +117,28 @@ async function main() {
 
   // render table
   loadingDiv.innerHTML = "Đang tạo bảng...";
-  let table = new DataTable("#myTable", {
+
+  if (table) {
+    table.destroy();
+    tableContainer.innerHTML = "";
+  }
+
+  const tableEle = document.createElement("table");
+  tableEle.id = "myTable";
+  tableEle.innerHTML = `
+      <thead>
+        <tr>
+          <th>Ngày</th>
+          <th>Bank</th>
+          <th>Mã</th>
+          <th>Số tiền</th>
+          <th>Chi tiết giao dịch</th>
+          <th>Trang</th>
+        </tr>
+      </thead>
+    `;
+  tableContainer.appendChild(tableEle);
+  table = new DataTable("#myTable", {
     searchDelay: 350,
     searchHighlight: true,
     search: {
@@ -193,14 +272,10 @@ function drawSummary(trans, allTrans) {
 
   sumaryDiv.innerHTML =
     "<table>" +
-    `<tr><td colspan='2' style="text-align: center">
+    `<tr><th colspan='2' style="text-align: center">
       Thống kê
-      ${
-        trans.length < allTrans.length
-          ? `${trans.length} dữ liệu đang hiển thị`
-          : "TỔNG"
-      }
-    </td></tr>` +
+      ${trans.length < allTrans.length ? `dữ liệu đang hiển thị` : "TỔNG"}
+    </th></tr>` +
     [
       ["Giao dịch", formatNumber(trans.length)],
       ["Tổng tiền", formatMoney(total)],
@@ -374,4 +449,8 @@ const formatter = {
 };
 function formatMoney(money) {
   return formatter.money.format(money);
+}
+
+function padZero(num) {
+  return num.toString().padStart(2, "0");
 }

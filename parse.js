@@ -41,18 +41,44 @@ async function main() {
         .replace("/2024", ""),
     }));
 
-  // Save all
-  const outputFile = "./data/output/all";
-  saveTransactions(allTrans, outputFile);
+  // // Save all
+  const outputPath = "./data/output/";
+  saveTransactions(allTrans, outputPath + "all");
 
-  // Compress
-  console.log("Compressing...");
-  const input = fs.createReadStream(outputFile + ".csv");
-  const output = fs.createWriteStream(outputFile + ".csv.gz");
-  input.pipe(zlib.createGzip({ level: 9, memLevel: 9 })).pipe(output);
-  output.on("finish", () => {
-    console.log("DONE");
-  });
+  // Load all
+  // console.log('Loading "all" transactions...');
+  // const allTransCsv = fs.readFileSync(outputPath + "all.csv").toString("utf-8");
+  // const allTrans = allTransCsv
+  //   .split("\n")
+  //   .slice(1) // remove header
+  //   .map((_) => {
+  //     const [date, bank, id, money, desc, page] = _.split(",");
+  //     return {
+  //       date,
+  //       bank,
+  //       id,
+  //       money: parseInt(money),
+  //       desc,
+  //       page: parseInt(page) || "_",
+  //     };
+  //   });
+
+  // Save by date
+  console.log("Saving " + allTrans.length + " transactions by date...");
+  const dates = [...new Set(allTrans.map((_) => _.date.split(" ")[0]))];
+  console.log(dates);
+  for (const date of dates) {
+    const trans = allTrans.filter((_) => _.date.startsWith(date));
+    saveTransactions(trans, outputPath + "byDate/" + date.replace(/\//g, "-"));
+  }
+
+  // Save by bank
+  console.log("Saving " + allTrans.length + " transactions by bank...");
+  const banks = [...new Set(allTrans.map((_) => _.bank))];
+  for (const bank of banks) {
+    const trans = allTrans.filter((_) => _.bank === bank);
+    saveTransactions(trans, outputPath + "byBank/" + bank);
+  }
 }
 main();
 
@@ -418,8 +444,9 @@ function saveTransactions(data, outputPath) {
   if (!data?.length) return console.log("> ERROR: No transactions to save");
 
   // fs.writeFileSync(outputPath + ".json", JSON.stringify(data, null, 4));
-  // console.log("Saved " + data.length + " transactions to " + outputPath);
+  // console.log("Saved " + data.length + " transactions to " + outputPath + ".json");
 
+  const csvFile = outputPath + ".csv";
   const csv = data
     .map(
       (t) =>
@@ -428,8 +455,18 @@ function saveTransactions(data, outputPath) {
         }`
     )
     .join("\n");
-  fs.writeFileSync(outputPath + ".csv", "date,bank,id,money,desc,page\n" + csv);
-  console.log("Saved " + data.length + " transactions to " + outputPath);
+  fs.writeFileSync(csvFile, "date,bank,id,money,desc,page\n" + csv);
+  console.log("Saved " + data.length + " transactions to " + csvFile);
+
+  // Compress
+  console.log("Compressing...");
+  const compressedFile = csvFile + ".gz";
+  const input = fs.createReadStream(csvFile);
+  const output = fs.createWriteStream(compressedFile);
+  input.pipe(zlib.createGzip({ level: 9, memLevel: 9 })).pipe(output);
+  output.on("finish", () => {
+    console.log("Saved compressed CSV to " + compressedFile);
+  });
 }
 
 function log(msg) {

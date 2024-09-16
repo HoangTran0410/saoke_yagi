@@ -46,24 +46,16 @@
         (<a target="_blank" href="../data/input/">Xem nguồn</a>)
     </p>
 
-    <div id="sumary"></div>
-
-    <div class="table_container">
-        <table id="myTable" class="display">
-            <thead>
-                <tr>
-                    <th>Ngày</th>
-                    <th>Bank</th>
-                    <th>Mã</th>
-                    <th>Số tiền</th>
-                    <th>Chi tiết giao dịch</th>
-                    <th>Trang PDF</th>
-                </tr>
-            </thead>
-        </table>
+    <div id="data-select-container">
+        Chọn dữ liệu: <select class="dt-input" id="data-select"></select> <button id="fetch-data-btn">Tải dữ
+            liệu</button>
     </div>
 
     <div id="loading">Đang tải trang...</div>
+
+    <div id="sumary"></div>
+
+    <div class="table_container"></div>
 
     <script src="./main.js"></script>
 </body>
