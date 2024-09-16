@@ -78,16 +78,12 @@ h3 {
     padding: 10px;
 }
 
-#jsChart,
 #agChart {
-    min-height: 300px;
     min-width: min(700px, 100vw);
 }
 
 #sumary table {
     text-align: right;
-    /* border: #21201d 1px solid; */
-    border-collapse: collapse;
 }
 
 #sumary td {
