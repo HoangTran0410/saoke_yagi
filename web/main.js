@@ -304,19 +304,11 @@ function drawSummary(trans, allTrans) {
     [100000000, 500000000],
     [500000000, 1000000000],
   ];
-  const totalTransactionsByRange = ranges.map((range) => {
+  const totalByRange = ranges.map((range) => {
+    const m = trans.filter((t) => t.money >= range[0] && t.money < range[1]);
     return {
-      count: trans.filter((t) => t.money >= range[0] && t.money < range[1])
-        .length,
-      name: shortenMoney(range[0]) + " - " + shortenMoney(range[1]),
-    };
-  });
-  const totalMoneyByRange = ranges.map((range) => {
-    return {
-      count: trans
-        .filter((t) => t.money >= range[0] && t.money < range[1])
-        .map((t) => t.money)
-        .reduce((a, b) => a + b, 0),
+      transactions: m.length,
+      moneys: m.reduce((a, b) => a + b.money, 0),
       name: shortenMoney(range[0]) + " - " + shortenMoney(range[1]),
     };
   });
@@ -329,17 +321,17 @@ function drawSummary(trans, allTrans) {
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: totalTransactionsByRange.map((c) => c.name),
+        labels: totalByRange.map((c) => c.name),
         datasets: [
           {
             label: "Tổng giao dịch",
-            data: totalTransactionsByRange.map((c) => c.count),
+            data: totalByRange.map((c) => c.transactions),
             minBarLength: 2,
             yAxisID: "count",
           },
           {
             label: "Tổng tiền",
-            data: totalMoneyByRange.map((c) => c.count),
+            data: totalByRange.map((c) => c.moneys),
             minBarLength: 2,
             yAxisID: "money",
           },
@@ -367,9 +359,9 @@ function drawSummary(trans, allTrans) {
       },
     });
   } else {
-    chart.data.labels = totalTransactionsByRange.map((c) => c.name);
-    chart.data.datasets[0].data = totalTransactionsByRange.map((c) => c.count);
-    chart.data.datasets[1].data = totalMoneyByRange.map((c) => c.count);
+    chart.data.labels = totalByRange.map((c) => c.name);
+    chart.data.datasets[0].data = totalByRange.map((c) => c.transactions);
+    chart.data.datasets[1].data = totalByRange.map((c) => c.moneys);
     chart.update();
   }
 
