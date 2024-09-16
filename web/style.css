@@ -111,3 +111,13 @@ button {
     padding-bottom: 5px;
     /* space bottom */
 }
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 50px;
+}
+
+.table-container table {
+    min-width: 1248px;
+}

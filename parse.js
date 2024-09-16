@@ -20,12 +20,21 @@ async function main() {
   const vcb = await MTTQ_VCB_1_10();
   const vcb2 = await MTTQ_VCB_11();
   const vcb3 = await MTTQ_VCB_12();
+  const vcb4 = await MTTQ_VCB_13();
   const bidv = await MTTQ_BIDV_1_12();
   const agri = await MTTQ_Agribank_9_13();
   const vietin = await CTTU_Vietinbank_10_12();
 
   // Clean data
-  const allTrans = [...vcb, ...vcb2, ...vcb3, ...bidv, ...vietin, ...agri]
+  const allTrans = [
+    ...vcb,
+    ...vcb2,
+    ...vcb3,
+    ...vcb4,
+    ...bidv,
+    ...vietin,
+    ...agri,
+  ]
     // sort by date
     .sort((a, b) => a.date.localeCompare(b.date))
     // shorten date
@@ -41,7 +50,7 @@ async function main() {
         .replace("/2024", ""),
     }));
 
-  // // Save all
+  // Save all
   const outputPath = "./data/output/";
   saveTransactions(allTrans, outputPath + "all");
 
@@ -84,7 +93,7 @@ main();
 
 async function MTTQ_VCB_1_10(
   pdfPath = "./data/input/MTTQ_VCB_1-10.pdf",
-  outputPath = "./data/output/MTTQ_VCB_1-10"
+  outputPath = "./data/output/byFile/MTTQ_VCB_1-10"
 ) {
   const rows = await getPDF(pdfPath, outputPath);
 
@@ -137,14 +146,14 @@ async function MTTQ_VCB_1_10(
   }
 
   // save transactions
-  // saveTransactions(transactions, outputPath);
+  saveTransactions(transactions, outputPath);
 
   return transactions;
 }
 
 async function MTTQ_VCB_11(
   pdfPath = "./data/input/MTTQ_VCB_11.pdf",
-  outputPath = "./data/output/MTTQ_VCB_11"
+  outputPath = "./data/output/byFile/MTTQ_VCB_11"
 ) {
   const rows = await getPDF(pdfPath, outputPath);
 
@@ -170,7 +179,7 @@ async function MTTQ_VCB_11(
         "100.000 \"980389.100924.232504.LE VI GIA HAN chuyen FT24255151179173\""
     ],*/
     const [index] = rows[i]?.[0]?.match(/^(\d+)$/) || [];
-    const [date] = rows[i]?.[1]?.match(/^1[12]\/09\/2024$/) || [];
+    const [date] = rows[i]?.[1]?.match(/^1[123]\/09\/2024$/) || [];
     const [_, money, __, desc] =
       rows[i]?.[2]?.match(/(\d{1,3}(?:\.\d{3})*)(\s*(?:"(.*)(")?)?)/) || [];
 
@@ -202,14 +211,22 @@ async function MTTQ_VCB_11(
   }
 
   // save transactions
-  // saveTransactions(transactions, outputPath);
+  saveTransactions(transactions, outputPath);
 
   return transactions;
 }
 
 async function MTTQ_VCB_12(
   pdfPath = "./data/input/MTTQ_VCB_12.pdf",
-  outputPath = "./data/output/MTTQ_VCB_12"
+  outputPath = "./data/output/byFile/MTTQ_VCB_12"
+) {
+  // Cùng cấu trúc
+  return MTTQ_VCB_11(pdfPath, outputPath);
+}
+
+async function MTTQ_VCB_13(
+  pdfPath = "./data/input/MTTQ_VCB_13.pdf",
+  outputPath = "./data/output/byFile/MTTQ_VCB_13"
 ) {
   // Cùng cấu trúc
   return MTTQ_VCB_11(pdfPath, outputPath);
@@ -217,7 +234,7 @@ async function MTTQ_VCB_12(
 
 async function MTTQ_BIDV_1_12(
   pdfPath = "./data/input/MTTQ_BIDV_1-12.pdf",
-  outputPath = "./data/output/MTTQ_BIDV_1-12"
+  outputPath = "./data/output/byFile/MTTQ_BIDV_1-12"
 ) {
   const rows = await getPDF(pdfPath, outputPath);
 
@@ -290,14 +307,14 @@ async function MTTQ_BIDV_1_12(
   }
 
   // save transactions
-  // saveTransactions(transactions, outputPath);
+  saveTransactions(transactions, outputPath);
 
   return transactions;
 }
 
 async function MTTQ_Agribank_9_13(
   pdfPath = "./data/input/MTTQ_Agribank_9-13.pdf",
-  outputPath = "./data/output/MTTQ_Agribank_9-13"
+  outputPath = "./data/output/byFile/MTTQ_Agribank_9-13"
 ) {
   const rows = await getPDF(pdfPath, outputPath);
 
@@ -356,14 +373,14 @@ async function MTTQ_Agribank_9_13(
   }
 
   // save transactions
-  // saveTransactions(transactions, outputPath);
+  saveTransactions(transactions, outputPath);
 
   return transactions;
 }
 
 async function CTTU_Vietinbank_10_12(
   pdfPath = "./data/input/CTTU_Vietinbank_10-12.pdf",
-  outputPath = "./data/output/CTTU_Vietinbank_10-12"
+  outputPath = "./data/output/byFile/CTTU_Vietinbank_10-12"
 ) {
   const rows = await getPDF(pdfPath, outputPath);
 
@@ -402,23 +419,20 @@ async function CTTU_Vietinbank_10_12(
   }
 
   // save transactions
-  // saveTransactions(transactions, outputPath);
+  saveTransactions(transactions, outputPath);
 
   return transactions;
 }
 
-async function getPDF(
-  pdfPath,
-  outputPath,
-  getCache = false,
-  saveCache = false
-) {
+async function getPDF(pdfPath, outputPath) {
   const cacheFile = outputPath + "_cache.json";
 
-  if (getCache) {
+  try {
     console.log("Loading cached file..." + cacheFile);
     const rows = JSON.parse(fs.readFileSync(cacheFile).toString("utf-8"));
-    return rows;
+    if (rows.length) return rows;
+  } catch (e) {
+    console.log("No cached file: " + e);
   }
 
   console.log("Loading PDF file... " + pdfPath);
@@ -427,10 +441,8 @@ async function getPDF(
   console.log("Parsing PDF...");
   const rows = await parser.parse();
 
-  if (saveCache) {
-    console.log("Saving result to cache file..." + cacheFile);
-    fs.writeFileSync(cacheFile, JSON.stringify(rows, null, 4));
-  }
+  console.log("Saving result to cache file..." + cacheFile);
+  fs.writeFileSync(cacheFile, JSON.stringify(rows, null, 4));
 
   return rows;
 }

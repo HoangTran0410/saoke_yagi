@@ -37,7 +37,7 @@ async function initSelect() {
   loadingDiv.innerHTML = "Đang tải danh sách file...";
   // create select
   [
-    { label: "Tất cả", value: "all" },
+    { label: "Toàn bộ dữ liệu", value: "all" },
     {
       group: "Theo ngân hàng",
       prefix: "byBank",
@@ -46,7 +46,20 @@ async function initSelect() {
     {
       group: "Theo ngày",
       prefix: "byDate",
-      options: Array.from({ length: 12 }).map((_, i) => `${padZero(i + 1)}-09`),
+      options: Array.from({ length: 13 }).map((_, i) => `${padZero(i + 1)}-09`),
+    },
+    {
+      group: "Theo file",
+      prefix: "byFile",
+      options: [
+        "MTTQ_VCB_1-10",
+        "MTTQ_VCB_11",
+        "MTTQ_VCB_12",
+        "MTTQ_VCB_13",
+        "MTTQ_BIDV_1-12",
+        "CTTU_Vietinbank_10-12",
+        "MTTQ_Agribank_9-13",
+      ],
     },
   ].forEach((d) => {
     const toPath = (o, prefix) =>
@@ -145,7 +158,11 @@ async function fetchData(filePath) {
           headerName: "Bank",
           width: 100,
         },
-        { field: "id", headerName: "Mã", width: 100 },
+        {
+          field: "id",
+          headerName: "Mã",
+          width: 100,
+        },
         {
           field: "money",
           headerName: "Số tiền",
@@ -169,7 +186,6 @@ async function fetchData(filePath) {
         },
       ],
       defaultColDef: {
-        // flex: 1,
         filter: true,
         sortable: true,
         // resizable: true,
