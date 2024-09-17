@@ -89,6 +89,13 @@ h3 {
 
 #chart-container canvas {
     height: 350px !important;
+    margin: 5px !important;
+}
+
+@media only screen and (max-width: 600px) {
+    #chart-container {
+        pointer-events: none;
+    }
 }
 
 #show-chart-btn {

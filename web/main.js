@@ -22,7 +22,7 @@ const allAgChart = {},
   let isShowChart = false;
   showChartBtn.addEventListener("click", () => {
     isShowChart = !isShowChart;
-    chartContainer.style.maxHeight = isShowChart ? "700px" : 0;
+    chartContainer.style.maxHeight = isShowChart ? "1200px" : 0;
   });
 })();
 
@@ -358,7 +358,6 @@ function drawSummary(trans, allTrans) {
             yKey: "moneys",
             yName: "Tổng tiền",
             tooltip: {
-              range: "nearest",
               renderer: ({ datum, xKey, yKey }) => {
                 return {
                   title: datum[xKey],
@@ -372,12 +371,7 @@ function drawSummary(trans, allTrans) {
             xKey: "name",
             yKey: "transactions",
             yName: "Tổng giao dịch",
-            interpolation: {
-              type: "smooth",
-            },
-            connectMissingData: false,
             tooltip: {
-              range: "nearest",
               renderer: ({ datum, xKey, yKey }) => {
                 return {
                   title: datum[xKey],
@@ -425,6 +419,75 @@ function drawSummary(trans, allTrans) {
       agCharts.AgCharts.update(allAgChart[key], allAgChartOptions[key]);
     }
   });
+
+  // chart money by bank
+  const key_byBank = "chartKey_bank";
+  const banks = ["VCB", "BIDV", "Agri", "Vietin"];
+  const totalByBank = banks.map((b) => {
+    const m = trans.filter((t) => t.bank === b);
+    return {
+      name: b,
+      moneys: m.reduce((a, b) => a + b.money, 0),
+      transactions: m.length > 0 ? m.length : null,
+    };
+  });
+
+  if (!allAgChart[key_byBank]) {
+    allAgChartOptions[key_byBank] = {
+      container: document.getElementById("chart-container"),
+      theme: darkMode ? "ag-default-dark" : "ag-default",
+      title: {
+        text: "Số tiền theo ngân hàng",
+      },
+      data: totalByBank,
+      series: [
+        {
+          type: "pie",
+          angleKey: "moneys",
+          legendItemKey: "name",
+          tooltip: {
+            renderer: ({ datum }) => {
+              return {
+                title: datum.name,
+                content: formatMoney(datum.moneys),
+              };
+            },
+          },
+        },
+      ],
+    };
+    allAgChart[key_byBank] = agCharts.AgCharts.create(
+      allAgChartOptions[key_byBank]
+    );
+  } else {
+    allAgChartOptions[key_byBank].data = totalByBank;
+    agCharts.AgCharts.update(
+      allAgChart[key_byBank],
+      allAgChartOptions[key_byBank]
+    );
+  }
+
+  // bubble chart
+  /*
+    xAxis: date
+    yAxis: transactions
+    bubble: money
+    legend: bank
+  */
+
+  // const key_bubble = "chartKey_bubble";
+  // const bankBubbleData = {};
+  // trans.forEach((t) => {
+  //   if (!bankBubbleData[t.bank]) {
+  //     bankBubbleData[t.bank] = [];
+  //   }
+  //   bankBubbleData[t.bank].push({
+  //     x: t.date.split(" ")[0],
+  //     y: t.money,
+  //     size: t.money,
+  //     name: t.bank,
+  //   });
+  // });
 }
 
 async function getBlobFromUrlWithProgress(url, progressCallback) {
