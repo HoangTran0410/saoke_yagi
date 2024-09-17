@@ -311,7 +311,7 @@ function drawSummary(trans, allTrans) {
           ? "> " + shortenMoney(range[0])
           : shortenMoney(range[0]) + " - " + shortenMoney(range[1]),
       moneys: m.reduce((a, b) => a + b.money, 0),
-      transactions: m.length,
+      transactions: m.length > 0 ? m.length : null,
     };
   });
 
@@ -324,7 +324,7 @@ function drawSummary(trans, allTrans) {
     return {
       name: d,
       moneys: m.reduce((a, b) => a + b.money, 0),
-      transactions: m.length,
+      transactions: m.length > 0 ? m.length : null,
     };
   });
 
@@ -372,6 +372,10 @@ function drawSummary(trans, allTrans) {
             xKey: "name",
             yKey: "transactions",
             yName: "Tổng giao dịch",
+            interpolation: {
+              type: "smooth",
+            },
+            connectMissingData: false,
             tooltip: {
               range: "nearest",
               renderer: ({ datum, xKey, yKey }) => {
@@ -417,7 +421,7 @@ function drawSummary(trans, allTrans) {
       };
       allAgChart[key] = agCharts.AgCharts.create(allAgChartOptions[key]);
     } else {
-      allAgChartOptions[key].data = totalByDate;
+      allAgChartOptions[key].data = data;
       agCharts.AgCharts.update(allAgChart[key], allAgChartOptions[key]);
     }
   });
