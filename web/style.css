@@ -80,11 +80,15 @@ h3 {
     align-items: center;
     justify-content: space-around;
     flex-wrap: wrap;
-    padding: 10px;
+    margin: 10px;
 
     max-height: 0px;
     overflow: hidden;
-    transition: all 0.3s;
+    transition: all 0.5s ease;
+}
+
+#chart-container canvas {
+    height: 350px !important;
 }
 
 #show-chart-btn {

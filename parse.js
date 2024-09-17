@@ -17,23 +17,15 @@ Transaction format:
 */
 
 async function main() {
-  const vcb = await MTTQ_VCB_1_10();
-  const vcb2 = await MTTQ_VCB_11();
-  const vcb3 = await MTTQ_VCB_12();
-  const vcb4 = await MTTQ_VCB_13();
-  const bidv = await MTTQ_BIDV_1_12();
-  const agri = await MTTQ_Agribank_9_13();
-  const vietin = await CTTU_Vietinbank_10_12();
-
-  // Clean data
   const allTrans = [
-    ...vcb,
-    ...vcb2,
-    ...vcb3,
-    ...vcb4,
-    ...bidv,
-    ...vietin,
-    ...agri,
+    ...(await MTTQ_VCB_1_10()),
+    ...(await MTTQ_VCB_11()),
+    ...(await MTTQ_VCB_12()),
+    ...(await MTTQ_VCB_13()),
+    ...(await MTTQ_VCB_14()),
+    ...(await MTTQ_BIDV_1_12()),
+    ...(await MTTQ_Agribank_9_13()),
+    ...(await CTTU_Vietinbank_10_12()),
   ]
     // sort by date
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -179,7 +171,7 @@ async function MTTQ_VCB_11(
         "100.000 \"980389.100924.232504.LE VI GIA HAN chuyen FT24255151179173\""
     ],*/
     const [index] = rows[i]?.[0]?.match(/^(\d+)$/) || [];
-    const [date] = rows[i]?.[1]?.match(/^1[123]\/09\/2024$/) || [];
+    const [date] = rows[i]?.[1]?.match(/^1[1-9]\/09\/2024$/) || [];
     const [_, money, __, desc] =
       rows[i]?.[2]?.match(/(\d{1,3}(?:\.\d{3})*)(\s*(?:"(.*)(")?)?)/) || [];
 
@@ -227,6 +219,14 @@ async function MTTQ_VCB_12(
 async function MTTQ_VCB_13(
   pdfPath = "./data/input/MTTQ_VCB_13.pdf",
   outputPath = "./data/output/byFile/MTTQ_VCB_13"
+) {
+  // Cùng cấu trúc
+  return MTTQ_VCB_11(pdfPath, outputPath);
+}
+
+async function MTTQ_VCB_14(
+  pdfPath = "./data/input/MTTQ_VCB_14.pdf",
+  outputPath = "./data/output/byFile/MTTQ_VCB_14"
 ) {
   // Cùng cấu trúc
   return MTTQ_VCB_11(pdfPath, outputPath);

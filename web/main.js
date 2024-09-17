@@ -20,7 +20,7 @@ const allAgChart = {},
   let isShowChart = false;
   showChartBtn.addEventListener("click", () => {
     isShowChart = !isShowChart;
-    chartContainer.style.maxHeight = isShowChart ? "2000px" : 0;
+    chartContainer.style.maxHeight = isShowChart ? "700px" : 0;
   });
 })();
 
@@ -62,7 +62,7 @@ async function initSelect() {
     {
       group: "Theo ngày",
       prefix: "byDate",
-      options: Array.from({ length: 13 }).map((_, i) => `${padZero(i + 1)}-09`),
+      options: Array.from({ length: 14 }).map((_, i) => `${padZero(i + 1)}-09`),
     },
     {
       group: "Theo file",
@@ -72,9 +72,10 @@ async function initSelect() {
         "MTTQ_VCB_11",
         "MTTQ_VCB_12",
         "MTTQ_VCB_13",
+        "MTTQ_VCB_14",
         "MTTQ_BIDV_1-12",
-        "CTTU_Vietinbank_10-12",
         "MTTQ_Agribank_9-13",
+        "CTTU_Vietinbank_10-12",
       ],
     },
   ].forEach((d) => {
@@ -305,93 +306,8 @@ function drawSummary(trans, allTrans) {
     };
   });
 
-  const chartKey_money = "chartKey_money";
-  if (!allAgChart[chartKey_money]) {
-    allAgChartOptions[chartKey_money] = {
-      container: document.getElementById("chart-container"),
-      theme: darkMode ? "ag-default-dark" : "ag-default",
-      title: {
-        text: "Tổng tiền/giao dịch theo giá tiền",
-      },
-      data: totalByRange,
-      legend: {
-        position: "top",
-      },
-      series: [
-        {
-          type: "bar",
-          xKey: "name",
-          yKey: "transactions",
-          yName: "Tổng giao dịch",
-          tooltip: {
-            renderer: ({ datum, xKey, yKey }) => {
-              return {
-                title: datum[xKey],
-                content: formatNumber(datum[yKey]),
-              };
-            },
-          },
-        },
-        {
-          type: "bar",
-          xKey: "name",
-          yKey: "moneys",
-          yName: "Tổng tiền",
-          tooltip: {
-            renderer: ({ datum, xKey, yKey }) => {
-              return {
-                title: datum[xKey],
-                content: formatMoney(datum[yKey]),
-              };
-            },
-          },
-        },
-      ],
-      axes: [
-        {
-          type: "category",
-          position: "bottom",
-          label: {
-            autoRotate: false,
-            rotation: 0,
-            avoidCollisions: true,
-          },
-        },
-        {
-          type: "number",
-          position: "left",
-          keys: ["transactions"],
-          label: {
-            formatter: (params) => {
-              return formatNumber(params.value);
-            },
-          },
-        },
-        {
-          type: "number",
-          position: "right",
-          keys: ["moneys"],
-          label: {
-            formatter: (params) => {
-              return shortenMoney(params.value);
-            },
-          },
-        },
-      ],
-    };
-    allAgChart[chartKey_money] = agCharts.AgCharts.create(
-      allAgChartOptions[chartKey_money]
-    );
-  } else {
-    allAgChartOptions[chartKey_money].data = totalByRange;
-    agCharts.AgCharts.update(
-      allAgChart[chartKey_money],
-      allAgChartOptions[chartKey_money]
-    );
-  }
-
   // chart by date
-  const dates = Array.from({ length: 13 }).map(
+  const dates = Array.from({ length: 14 }).map(
     (_, i) => `${padZero(i + 1)}/09`
   );
   const totalByDate = dates.map((d) => {
@@ -403,90 +319,99 @@ function drawSummary(trans, allTrans) {
     };
   });
 
-  const chartKey_date = "chartKey_date";
-  if (!allAgChart[chartKey_date]) {
-    allAgChartOptions[chartKey_date] = {
-      container: document.getElementById("chart-container"),
-      theme: darkMode ? "ag-default-dark" : "ag-default",
-      title: {
-        text: "Tổng tiền/giao dịch theo ngày",
-      },
+  [
+    {
+      key: "chartKey_money",
+      data: totalByRange,
+      title: "Tổng tiền/giao dịch theo giá tiền",
+    },
+    {
+      key: "chartKey_date",
       data: totalByDate,
-      legend: {
-        position: "top",
-      },
-      series: [
-        {
-          type: "bar",
-          xKey: "name",
-          yKey: "transactions",
-          yName: "Tổng giao dịch",
-          tooltip: {
-            renderer: ({ datum, xKey, yKey }) => {
-              return {
-                title: datum[xKey],
-                content: formatNumber(datum[yKey]),
-              };
+      title: "Tổng tiền/giao dịch theo ngày",
+    },
+  ].forEach(({ key, data, title }) => {
+    if (!allAgChart[key]) {
+      allAgChartOptions[key] = {
+        container: document.getElementById("chart-container"),
+        theme: darkMode ? "ag-default-dark" : "ag-default",
+        title: {
+          text: title,
+        },
+        data: data,
+        legend: {
+          position: "top",
+        },
+        series: [
+          {
+            type: "bar",
+            xKey: "name",
+            yKey: "moneys",
+            yName: "Tổng tiền",
+            tooltip: {
+              range: "nearest",
+              renderer: ({ datum, xKey, yKey }) => {
+                return {
+                  title: datum[xKey],
+                  content: formatMoney(datum[yKey]),
+                };
+              },
             },
           },
-        },
-        {
-          type: "bar",
-          xKey: "name",
-          yKey: "moneys",
-          yName: "Tổng tiền",
-          tooltip: {
-            renderer: ({ datum, xKey, yKey }) => {
-              return {
-                title: datum[xKey],
-                content: formatMoney(datum[yKey]),
-              };
+          {
+            type: "line",
+            xKey: "name",
+            yKey: "transactions",
+            yName: "Tổng giao dịch",
+            tooltip: {
+              range: "nearest",
+              renderer: ({ datum, xKey, yKey }) => {
+                return {
+                  title: datum[xKey],
+                  content: formatNumber(datum[yKey]) + " giao dịch",
+                };
+              },
             },
           },
-        },
-      ],
-      axes: [
-        {
-          type: "category",
-          position: "bottom",
-          label: {
-            autoRotate: false,
-            rotation: 0,
-            avoidCollisions: true,
-          },
-        },
-        {
-          type: "number",
-          position: "left",
-          keys: ["transactions"],
-          label: {
-            formatter: (params) => {
-              return formatNumber(params.value);
+        ],
+        axes: [
+          {
+            type: "category",
+            position: "bottom",
+            label: {
+              autoRotate: false,
+              rotation: 0,
+              avoidCollisions: true,
             },
           },
-        },
-        {
-          type: "number",
-          position: "right",
-          keys: ["moneys"],
-          label: {
-            formatter: (params) => {
-              return shortenMoney(params.value);
+          {
+            type: "number",
+            position: "left",
+            keys: ["transactions"],
+            label: {
+              formatter: (params) => {
+                return shortenMoney(params.value);
+              },
             },
           },
-        },
-      ],
-    };
-    allAgChart[chartKey_date] = agCharts.AgCharts.create(
-      allAgChartOptions[chartKey_date]
-    );
-  } else {
-    allAgChartOptions[chartKey_date].data = totalByDate;
-    agCharts.AgCharts.update(
-      allAgChart[chartKey_date],
-      allAgChartOptions[chartKey_date]
-    );
-  }
+          {
+            type: "number",
+            position: "right",
+            keys: ["moneys"],
+            label: {
+              formatter: (params) => {
+                return shortenMoney(params.value);
+              },
+            },
+          },
+        ],
+      };
+      allAgChart[key] = agCharts.AgCharts.create(allAgChartOptions[key]);
+    } else {
+      allAgChartOptions[key].data = totalByDate;
+      agCharts.AgCharts.update(allAgChart[key], allAgChartOptions[key]);
+    }
+  });
 }
 
 async function getBlobFromUrlWithProgress(url, progressCallback) {

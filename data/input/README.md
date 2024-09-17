@@ -13,6 +13,7 @@
   - [11/9](https://www.facebook.com/share/p/Uo4tsSVjxx4tSokJ/)
   - [12/9](https://www.facebook.com/share/p/Gy73hpJEevdpoXSe/)
   - [13/9](https://www.facebook.com/share/p/ANpGVKgBsiqLrQrr/)
+  - [14/9](https://www.facebook.com/share/p/w8fvPRQsMgXRuR4s/)
 - BIDV: Mặt Trận Tổ Quốc Việt Nam
   - [1/9 - 12/9](https://www.facebook.com/share/p/wc76KCcYVEurwfpE/)
 - Vietinbank: Ban Cứu Trợ Trung Ương Việt Nam
