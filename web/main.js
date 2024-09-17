@@ -269,10 +269,13 @@ function drawSummary(trans, allTrans) {
   });
 
   sumaryTable.innerHTML =
-    `<tr><th colspan='2' style="text-align: center">
-      Thống kê
-      ${trans.length < allTrans.length ? `dữ liệu đang hiển thị` : "TỔNG"}
-    </th></tr>` +
+    `<tr>
+      <th colspan='2' style="text-align: center">
+        Thống kê ${
+          trans.length < allTrans.length ? `dữ liệu đang hiển thị` : "TỔNG"
+        }
+      </th>
+    </tr>` +
     [
       ["Giao dịch", formatNumber(trans.length)],
       ["Tổng tiền", formatMoney(total)],
@@ -437,7 +440,7 @@ function drawSummary(trans, allTrans) {
       container: document.getElementById("chart-container"),
       theme: darkMode ? "ag-default-dark" : "ag-default",
       title: {
-        text: "Số tiền theo ngân hàng",
+        text: "Tổng tiền theo ngân hàng",
       },
       data: totalByBank,
       series: [
