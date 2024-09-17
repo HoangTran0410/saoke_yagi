@@ -9,6 +9,8 @@ const dataSelect = document.querySelector("#data-select");
 const fetchDataBtn = document.querySelector("#fetch-data-btn");
 const tableEle = document.querySelector("#myTable");
 
+const maxDate = 14;
+
 let darkMode = false;
 const allAgChart = {},
   allAgChartOptions = {};
@@ -62,7 +64,9 @@ async function initSelect() {
     {
       group: "Theo ngày",
       prefix: "byDate",
-      options: Array.from({ length: 14 }).map((_, i) => `${padZero(i + 1)}-09`),
+      options: Array.from({ length: maxDate }).map(
+        (_, i) => `${padZero(i + 1)}-09`
+      ),
     },
     {
       group: "Theo file",
@@ -188,7 +192,7 @@ async function fetchData(filePath) {
               if (cellDate > filterLocalDateAtMidnight) return 1;
               return 0;
             },
-            maxValidDate: "2024-09-13",
+            maxValidDate: "2024-09-" + maxDate,
             minValidDate: "2024-09-01",
             inRangeFloatingFilterDateFormat: "Do MMM YYYY",
           },
@@ -307,7 +311,7 @@ function drawSummary(trans, allTrans) {
   });
 
   // chart by date
-  const dates = Array.from({ length: 14 }).map(
+  const dates = Array.from({ length: maxDate }).map(
     (_, i) => `${padZero(i + 1)}/09`
   );
   const totalByDate = dates.map((d) => {
