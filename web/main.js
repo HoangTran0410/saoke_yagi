@@ -1,20 +1,27 @@
 import { AG_GRID_LOCALE_VN } from "./lib/ag_grid_vi.js";
 
 const loadingDiv = document.querySelector("#loading");
-const sumaryDiv = document.querySelector("#sumary");
+const chartContainer = document.querySelector("#chart-container");
+const showChartBtn = document.querySelector("#show-chart-btn");
 const sumaryTable = document.querySelector("#sumaryTable");
-const agChartDiv = document.querySelector("#agChart");
 const themeBtn = document.querySelector("#theme");
 const dataSelect = document.querySelector("#data-select");
 const fetchDataBtn = document.querySelector("#fetch-data-btn");
 const tableEle = document.querySelector("#myTable");
 
 let darkMode = false;
-let agChart, agChartOptions;
+const allAgChart = {},
+  allAgChartOptions = {};
 
 (() => {
   initTheme();
   initSelect();
+
+  let isShowChart = false;
+  showChartBtn.addEventListener("click", () => {
+    isShowChart = !isShowChart;
+    chartContainer.style.maxHeight = isShowChart ? "2000px" : 0;
+  });
 })();
 
 // theme
@@ -32,9 +39,11 @@ function initTheme() {
 function setDarkMode(dark) {
   darkMode = dark;
   tableEle.className = dark ? "ag-theme-quartz-dark" : "ag-theme-quartz";
-  if (agChart) {
-    agChartOptions.theme = dark ? "ag-default-dark" : "ag-default";
-    agCharts.AgCharts.update(agChart, agChartOptions);
+  for (const key in allAgChartOptions) {
+    if (allAgChartOptions[key]) {
+      allAgChartOptions[key].theme = dark ? "ag-default-dark" : "ag-default";
+      agCharts.AgCharts.update(allAgChart[key], allAgChartOptions[key]);
+    }
   }
   document.body.classList.toggle("dark", dark);
   localStorage.setItem("theme", dark);
@@ -269,7 +278,9 @@ function drawSummary(trans, allTrans) {
       .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
       .join("");
 
-  // chart money range
+  showChartBtn.style.display = "block";
+
+  // chart by money range
   const ranges = [
     [1000, 10000],
     [10000, 20000],
@@ -294,9 +305,10 @@ function drawSummary(trans, allTrans) {
     };
   });
 
-  if (!agChart) {
-    agChartOptions = {
-      container: document.getElementById("agChart"),
+  const chartKey_money = "chartKey_money";
+  if (!allAgChart[chartKey_money]) {
+    allAgChartOptions[chartKey_money] = {
+      container: document.getElementById("chart-container"),
       theme: darkMode ? "ag-default-dark" : "ag-default",
       title: {
         text: "Tổng tiền/giao dịch theo giá tiền",
@@ -367,10 +379,113 @@ function drawSummary(trans, allTrans) {
         },
       ],
     };
-    agChart = agCharts.AgCharts.create(agChartOptions);
+    allAgChart[chartKey_money] = agCharts.AgCharts.create(
+      allAgChartOptions[chartKey_money]
+    );
   } else {
-    agChartOptions.data = totalByRange;
-    agCharts.AgCharts.update(agChart, agChartOptions);
+    allAgChartOptions[chartKey_money].data = totalByRange;
+    agCharts.AgCharts.update(
+      allAgChart[chartKey_money],
+      allAgChartOptions[chartKey_money]
+    );
+  }
+
+  // chart by date
+  const dates = Array.from({ length: 13 }).map(
+    (_, i) => `${padZero(i + 1)}/09`
+  );
+  const totalByDate = dates.map((d) => {
+    const m = trans.filter((t) => t.date.startsWith(d));
+    return {
+      name: d,
+      moneys: m.reduce((a, b) => a + b.money, 0),
+      transactions: m.length,
+    };
+  });
+
+  const chartKey_date = "chartKey_date";
+  if (!allAgChart[chartKey_date]) {
+    allAgChartOptions[chartKey_date] = {
+      container: document.getElementById("chart-container"),
+      theme: darkMode ? "ag-default-dark" : "ag-default",
+      title: {
+        text: "Tổng tiền/giao dịch theo ngày",
+      },
+      data: totalByDate,
+      legend: {
+        position: "top",
+      },
+      series: [
+        {
+          type: "bar",
+          xKey: "name",
+          yKey: "transactions",
+          yName: "Tổng giao dịch",
+          tooltip: {
+            renderer: ({ datum, xKey, yKey }) => {
+              return {
+                title: datum[xKey],
+                content: formatNumber(datum[yKey]),
+              };
+            },
+          },
+        },
+        {
+          type: "bar",
+          xKey: "name",
+          yKey: "moneys",
+          yName: "Tổng tiền",
+          tooltip: {
+            renderer: ({ datum, xKey, yKey }) => {
+              return {
+                title: datum[xKey],
+                content: formatMoney(datum[yKey]),
+              };
+            },
+          },
+        },
+      ],
+      axes: [
+        {
+          type: "category",
+          position: "bottom",
+          label: {
+            autoRotate: false,
+            rotation: 0,
+            avoidCollisions: true,
+          },
+        },
+        {
+          type: "number",
+          position: "left",
+          keys: ["transactions"],
+          label: {
+            formatter: (params) => {
+              return formatNumber(params.value);
+            },
+          },
+        },
+        {
+          type: "number",
+          position: "right",
+          keys: ["moneys"],
+          label: {
+            formatter: (params) => {
+              return shortenMoney(params.value);
+            },
+          },
+        },
+      ],
+    };
+    allAgChart[chartKey_date] = agCharts.AgCharts.create(
+      allAgChartOptions[chartKey_date]
+    );
+  } else {
+    allAgChartOptions[chartKey_date].data = totalByDate;
+    agCharts.AgCharts.update(
+      allAgChart[chartKey_date],
+      allAgChartOptions[chartKey_date]
+    );
   }
 }
 
