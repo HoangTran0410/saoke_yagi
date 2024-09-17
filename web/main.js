@@ -300,11 +300,16 @@ function drawSummary(trans, allTrans) {
     [50000000, 100000000],
     [100000000, 500000000],
     [500000000, 1000000000],
+    [1000000000, 5000000000],
+    [5000000000, Infinity],
   ];
   const totalByRange = ranges.map((range) => {
     const m = trans.filter((t) => t.money >= range[0] && t.money < range[1]);
     return {
-      name: shortenMoney(range[0]) + " - " + shortenMoney(range[1]),
+      name:
+        range[1] === Infinity
+          ? "> " + shortenMoney(range[0])
+          : shortenMoney(range[0]) + " - " + shortenMoney(range[1]),
       moneys: m.reduce((a, b) => a + b.money, 0),
       transactions: m.length,
     };
