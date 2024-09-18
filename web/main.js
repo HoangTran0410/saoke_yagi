@@ -1,3 +1,4 @@
+import { BankFilter } from "./components/bankFilter.js";
 import { AG_GRID_LOCALE_VN } from "./lib/ag_grid_vi.js";
 
 const loadingDiv = document.querySelector("#loading");
@@ -102,6 +103,7 @@ async function initSelect() {
   // fetch file size
   const options = dataSelect.querySelectorAll("option");
   loadingDiv.innerHTML = "Đang tải kích thước file...";
+  fetchDataBtn.disabled = true;
   await Promise.all(
     Array.from(options).map(async (o) => {
       const res = await fetch(o.value, {
@@ -112,6 +114,7 @@ async function initSelect() {
       o.innerHTML += ` (${size})`;
     })
   );
+  fetchDataBtn.disabled = false;
   loadingDiv.innerHTML = "Vui lòng chọn dữ liệu muốn xem. Rồi bấm Tải";
 
   fetchDataBtn.addEventListener("click", () => {
@@ -149,6 +152,7 @@ async function fetchData(filePath) {
     const line = lines[i];
     const parts = line.split(",");
     transactions.push({
+      index: i,
       date: parts[0],
       bank: parts[1],
       id: parts[2],
@@ -166,11 +170,16 @@ async function fetchData(filePath) {
   } else {
     gridApi = agGrid.createGrid(tableEle, {
       localeText: AG_GRID_LOCALE_VN,
-      pagination: true,
       enableCellTextSelection: true,
       suppressDragLeaveHidesColumns: true,
       rowData: transactions,
       columnDefs: [
+        {
+          field: "index",
+          headerName: "#",
+          width: 80,
+          filter: false,
+        },
         {
           field: "date",
           headerName: "Ngày",
@@ -201,6 +210,7 @@ async function fetchData(filePath) {
           field: "bank",
           headerName: "Bank",
           width: 100,
+          filter: BankFilter,
         },
         {
           field: "id",

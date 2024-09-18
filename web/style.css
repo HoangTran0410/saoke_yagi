@@ -170,6 +170,26 @@ body.dark select {
     color: #eee;
 }
 
+input[type="checkbox"] {
+    margin: 0 5px;
+    padding: 5px;
+}
+
+.bank-filter-container {
+    padding: 10px;
+    font-size: 12px;
+}
+
+.bank-filter-item {
+    padding: 5px;
+    display: block;
+    cursor: pointer;
+}
+
+.bank-filter-item:hover {
+    background-color: #2225;
+}
+
 /* https://getcssscan.com/css-buttons-examples */
 .button {
     appearance: none;
