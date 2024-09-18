@@ -11,6 +11,7 @@ const fetchDataBtn = document.querySelector("#fetch-data-btn");
 const tableEle = document.querySelector("#myTable");
 
 const maxDate = 15;
+const fetchCacheKey = Date.now();
 
 let darkMode = false;
 const allAgChart = {},
@@ -120,7 +121,7 @@ async function initSelect() {
 
   fetchDataBtn.addEventListener("click", () => {
     fetchDataBtn.disabled = true;
-    fetchData(dataSelect.value + "?v=" + Date.now())
+    fetchData(dataSelect.value + "?v=" + fetchCacheKey)
       .then(() => {})
       .catch((err) => {
         alert("ERROR: " + err);
@@ -136,11 +137,15 @@ async function fetchData(filePath) {
   loadingDiv.style.display = "block";
 
   // fetch data
-  const response = await getBlobFromUrlWithProgress(filePath, (progress) => {
-    loadingDiv.innerHTML = `Đang tải dữ liêu... ${formatSize(
-      progress.loaded
-    )}/${formatSize(progress.total)} (${formatSize(progress.speed)}/s)`;
-  });
+  const response = await getBlobFromUrlWithProgress(
+    filePath,
+    {},
+    (progress) => {
+      loadingDiv.innerHTML = `Đang tải dữ liêu... ${formatSize(
+        progress.loaded
+      )}/${formatSize(progress.total)} (${formatSize(progress.speed)}/s)`;
+    }
+  );
   loadingDiv.innerHTML = "Tải xong. Đang giải nén dữ liệu...";
   const compressedData = new Uint8Array(await response.arrayBuffer());
   const content = pako.inflate(compressedData, { to: "string" });
@@ -504,8 +509,8 @@ function drawSummary(trans, allTrans) {
   // });
 }
 
-async function getBlobFromUrlWithProgress(url, progressCallback) {
-  const response = await fetch(url, {});
+async function getBlobFromUrlWithProgress(url, options, progressCallback) {
+  const response = await fetch(url, options);
   if (!response.ok) {
     throw new Error(`Error: ${response.status} - ${response.statusText}`);
   }
