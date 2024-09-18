@@ -10,7 +10,7 @@ const dataSelect = document.querySelector("#data-select");
 const fetchDataBtn = document.querySelector("#fetch-data-btn");
 const tableEle = document.querySelector("#myTable");
 
-const maxDate = 14;
+const maxDate = 15;
 
 let darkMode = false;
 const allAgChart = {},
@@ -81,6 +81,7 @@ async function initSelect() {
         "MTTQ_BIDV_1-12",
         "MTTQ_Agribank_9-13",
         "CTTU_Vietinbank_10-12",
+        "CTTU_Vietinbank_13-15",
       ],
     },
   ].forEach((d) => {

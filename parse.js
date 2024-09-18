@@ -26,6 +26,7 @@ async function main() {
     ...(await MTTQ_BIDV_1_12()),
     ...(await MTTQ_Agribank_9_13()),
     ...(await CTTU_Vietinbank_10_12()),
+    ...(await CTTU_Vietinbank_13_15()),
   ]
     // sort by date
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -397,7 +398,7 @@ async function CTTU_Vietinbank_10_12(
         "TRAN TIEN ANH – A/C"
     ] */
     const [_, index, date, time] =
-      rows[i]?.[0]?.match(/^(\d+)(1[0-2]\/09\/2024) (\d{2}:\d{2}:\d{2})$/) ||
+      rows[i]?.[0]?.match(/^(\d+)(1[0-5]\/09\/2024) (\d{2}:\d{2}:\d{2})$/) ||
       [];
     const [money] = rows[i]?.[2]?.match(/^(\d{1,3}(?:\.\d{3})*)$/) || [];
 
@@ -414,7 +415,7 @@ async function CTTU_Vietinbank_10_12(
           .join(" "),
         page: "_",
       });
-    }
+    } //else console.log(rows[i], date, index, time, money);
     i++;
   }
 
@@ -422,6 +423,14 @@ async function CTTU_Vietinbank_10_12(
   saveTransactions(transactions, outputPath);
 
   return transactions;
+}
+
+async function CTTU_Vietinbank_13_15(
+  pdfPath = "./data/input/CTTU_Vietinbank_13-15.pdf",
+  outputPath = "./data/output/byFile/CTTU_Vietinbank_13-15"
+) {
+  // Cùng cấu trúc
+  return CTTU_Vietinbank_10_12(pdfPath, outputPath);
 }
 
 async function getPDF(pdfPath, outputPath) {
