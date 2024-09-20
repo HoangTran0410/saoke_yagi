@@ -468,9 +468,10 @@ async function CTTU_Vietinbank_16(
     const descInMoney = !money || money.length < rows[i]?.[3].length;
 
     if (date && index && time) {
-      const descs = rows[i]
-        .slice(descInMoney ? 2 : 3)
-        .map((_) => (descInMoney ? _.replace(money, "") : _));
+      const descs = [
+        descInMoney ? null : rows[i]?.[2],
+        ...rows[i].slice(descInMoney ? 2 : 4),
+      ].map((_) => (descInMoney ? _.replace(money, "") : _));
       // if (!moneyToInt(money)) console.log(rows[i]);
       transactions.push({
         date: `${date} ${time}`,
