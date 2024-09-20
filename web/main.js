@@ -10,7 +10,7 @@ const dataSelect = document.querySelector("#data-select");
 const fetchDataBtn = document.querySelector("#fetch-data-btn");
 const tableEle = document.querySelector("#myTable");
 
-const maxDate = 15;
+const maxDate = 16;
 const fetchCacheKey = Date.now();
 
 let darkMode = false;
@@ -83,6 +83,7 @@ async function initSelect() {
         "MTTQ_Agribank_9-13",
         "CTTU_Vietinbank_10-12",
         "CTTU_Vietinbank_13-15",
+        "CTTU_Vietinbank_16",
       ],
     },
   ].forEach((d) => {

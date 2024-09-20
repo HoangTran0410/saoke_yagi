@@ -27,6 +27,7 @@ async function main() {
     ...(await MTTQ_Agribank_9_13()),
     ...(await CTTU_Vietinbank_10_12()),
     ...(await CTTU_Vietinbank_13_15()),
+    ...(await CTTU_Vietinbank_16()),
   ]
     // sort by date
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -431,6 +432,65 @@ async function CTTU_Vietinbank_13_15(
 ) {
   // Cùng cấu trúc
   return CTTU_Vietinbank_10_12(pdfPath, outputPath);
+}
+
+async function CTTU_Vietinbank_16(
+  pdfPath = "./data/input/CTTU_Vietinbank_16.pdf",
+  outputPath = "./data/output/byFile/CTTU_Vietinbank_16"
+) {
+  const rows = await getPDF(pdfPath, outputPath);
+
+  console.log("Parsing transactions...");
+  const transactions = [];
+  let i = 0;
+  while (i < rows.length) {
+    if (!Array.isArray(rows[i])) continue;
+    /*
+      [
+        "9",
+        "16/09/2024 00:57:49",
+        "con mong moi nguoi binh an (CT1111); thoi gian GD:15/09/2024 23:09:00",
+        "100.000",
+        "MAI THI ANH NGOC",
+        "109882673***"
+    ]
+    [
+        "3812",
+        "16/09/2024 10:59:26",
+        "Chuyen tien den tu NAPAS Noi dung: IBFT gop chut tam long cung ba con vung lu (ct1111)",
+        "060129014***300.000",
+        "SACOMBANK"
+    ] */
+    const index = rows[i]?.[0]?.match(/\d+$/)?.[0];
+    const [_, date, time] =
+      rows[i]?.[1]?.match(/^(1[0-6]\/09\/2024) (\d{2}:\d{2}:\d{2})$/) || [];
+    const money = rows[i]?.[3]?.match(/(\d{1,3}(?:\.\d{3})*)$/)?.[0];
+    const descInMoney = !money || money.length < rows[i]?.[3].length;
+
+    if (date && index && time) {
+      const descs = rows[i]
+        .slice(descInMoney ? 2 : 3)
+        .map((_) => (descInMoney ? _.replace(money, "") : _));
+      // if (!moneyToInt(money)) console.log(rows[i]);
+      transactions.push({
+        date: `${date} ${time}`,
+        bank: "Vietin",
+        id: index,
+        money: moneyToInt(money),
+        desc: descs
+          .filter(Boolean)
+          .map((_) => _.replace(/,/g, " ").trim())
+          .join(" "),
+        page: "_",
+      });
+    } //else console.log(rows[i], date, index, time, money);
+    i++;
+  }
+
+  // save transactions
+  saveTransactions(transactions, outputPath);
+
+  return transactions;
 }
 
 async function getPDF(pdfPath, outputPath) {
