@@ -28,6 +28,7 @@ async function main() {
     ...(await CTTU_Vietinbank_10_12()),
     ...(await CTTU_Vietinbank_13_15()),
     ...(await CTTU_Vietinbank_16()),
+    ...(await CTTU_Vietinbank_17()),
   ]
     // sort by date
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -463,7 +464,7 @@ async function CTTU_Vietinbank_16(
     ] */
     const index = rows[i]?.[0]?.match(/\d+$/)?.[0];
     const [_, date, time] =
-      rows[i]?.[1]?.match(/^(1[0-6]\/09\/2024) (\d{2}:\d{2}:\d{2})$/) || [];
+      rows[i]?.[1]?.match(/^(1[67]\/09\/2024) (\d{2}:\d{2}:\d{2})$/) || [];
     const money = rows[i]?.[3]?.match(/(\d{1,3}(?:\.\d{3})*)$/)?.[0];
     const descInMoney = !money || money.length < rows[i]?.[3].length;
 
@@ -471,7 +472,9 @@ async function CTTU_Vietinbank_16(
       const descs = [
         descInMoney ? null : rows[i]?.[2],
         ...rows[i].slice(descInMoney ? 2 : 4),
-      ].map((_) => (descInMoney ? _.replace(money, "") : _));
+      ]
+        .filter(Boolean)
+        .map((_) => (descInMoney ? _.replace(money, "") : _));
       // if (!moneyToInt(money)) console.log(rows[i]);
       transactions.push({
         date: `${date} ${time}`,
@@ -492,6 +495,14 @@ async function CTTU_Vietinbank_16(
   saveTransactions(transactions, outputPath);
 
   return transactions;
+}
+
+async function CTTU_Vietinbank_17(
+  pdfPath = "./data/input/CTTU_Vietinbank_17.pdf",
+  outputPath = "./data/output/byFile/CTTU_Vietinbank_17"
+) {
+  // Cùng cấu trúc
+  return CTTU_Vietinbank_16(pdfPath, outputPath);
 }
 
 async function getPDF(pdfPath, outputPath) {

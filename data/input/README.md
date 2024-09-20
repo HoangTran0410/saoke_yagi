@@ -20,6 +20,7 @@
   - [10/9 - 12/9](https://www.facebook.com/share/p/ckeiR1w2P6gJFsVw/)
   - [13/9 - 15/9](https://www.facebook.com/share/p/jDqEGbUcyocq4fF5/)
   - [16/9](https://www.facebook.com/share/p/VSxmVBLTEToSpDyx/)
+  - [17/9](https://www.facebook.com/share/p/vwncL9cUMFNC5Zmn/)
 - Agribank: Quỹ Cứu trợ TP Hà Nội
   - [tới 13/9](https://www.facebook.com/share/p/CjS3ZFRjwFSXUbXT/)
 
