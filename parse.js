@@ -83,6 +83,14 @@ async function main() {
     const trans = allTrans.filter((_) => _.bank === bank);
     saveTransactions(trans, outputPath + "byBank/" + bank);
   }
+
+  // Save top money
+  const topLength = 5000;
+  const topMoney = [...allTrans]
+    .sort((a, b) => b.money - a.money)
+    .slice(0, topLength);
+  console.log("Saving " + topMoney.length + " top money transactions...");
+  saveTransactions(topMoney, outputPath + "top/topMoney");
 }
 main();
 

@@ -58,6 +58,7 @@ async function initSelect() {
   // create select
   [
     { label: "Toàn bộ dữ liệu", value: "all" },
+    { label: "Top 5000 giao dịch cao nhất", value: "top/topMoney" },
     {
       group: "Theo ngân hàng",
       prefix: "byBank",
