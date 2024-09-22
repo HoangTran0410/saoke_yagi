@@ -33,17 +33,7 @@ async function main() {
     // sort by date
     .sort((a, b) => a.date.localeCompare(b.date))
     // shorten date
-    .map((_) => ({
-      ..._,
-      desc: _.desc
-        .trim()
-        .replace(/\s+/g, " ") // "  " => " "
-        .replace(/^\"(.*)\"$/, "$1"), // "abc" => abc
-      // 01/09/2024 -> 1/9
-      date: _.date
-        // .replace(/0(\d\/)/g, "$1")
-        .replace("/2024", ""),
-    }));
+    .map(cleanData);
 
   // Save all
   const outputPath = "./data/output/";
@@ -473,7 +463,7 @@ async function CTTU_Vietinbank_16(
     const index = rows[i]?.[0]?.match(/\d+$/)?.[0];
     const [_, date, time] =
       rows[i]?.[1]?.match(/^(1[67]\/09\/2024) (\d{2}:\d{2}:\d{2})$/) || [];
-    const money = rows[i]?.[3]?.match(/(\d{1,3}(?:\.\d{3})*)$/)?.[0];
+    const money = rows[i]?.[3]?.match(/(\d{1,3}(?:\.\d{3})*)/)?.[0];
     const descInMoney = !money || money.length < rows[i]?.[3].length;
 
     if (date && index && time) {
@@ -547,8 +537,10 @@ function saveTransactions(data, outputPath) {
   // fs.writeFileSync(outputPath + ".json", JSON.stringify(data, null, 4));
   // console.log("Saved " + data.length + " transactions to " + outputPath + ".json");
 
+  const _data = data.map(cleanData);
+
   const csvFile = outputPath + ".csv";
-  const csv = data
+  const csv = _data
     .map(
       (t) =>
         `${t.date},${t.bank},${t.id},${t.money},${t.desc.replace(/,/g, " ")},${
@@ -557,7 +549,7 @@ function saveTransactions(data, outputPath) {
     )
     .join("\n");
   fs.writeFileSync(csvFile, "date,bank,id,money,desc,page\n" + csv);
-  console.log("Saved " + data.length + " transactions to " + csvFile);
+  console.log("Saved " + _data.length + " transactions to " + csvFile);
 
   // Compress
   console.log("Compressing...");
@@ -572,4 +564,18 @@ function saveTransactions(data, outputPath) {
 
 function log(msg) {
   process.stdout.write(msg + "\r");
+}
+
+function cleanData(_) {
+  return {
+    ..._,
+    desc: _.desc
+      .trim()
+      .replace(/\s+/g, " ") // "  " => " "
+      .replace(/^\"(.*)\"$/, "$1"), // "abc" => abc
+    // 01/09/2024 -> 1/9
+    date: _.date
+      // .replace(/0(\d\/)/g, "$1")
+      .replace("/2024", ""),
+  };
 }
